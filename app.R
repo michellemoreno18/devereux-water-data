@@ -34,45 +34,54 @@ df <- read_csv("data/water_quality_data.csv", show_col_types = FALSE) %>%
   drop_na(Date, Site)
 
 # UI
-ui <- fluidPage(
-  titlePanel("Explore Water Quality Trends"),
-  
-  tabsetPanel(
-    tabPanel("Overview",
-             br(),
-             h3("Devereux Slough Water Quality Monitoring"),
-             p("This Shiny application helps visualize trends in water quality at multiple monitoring sites in Devereux Slough."),
-             p("Use the Trends tab to explore time series and seasonal patterns for parameters such as temperature, salinity, dissolved oxygen, and turbidity.")
-    ),
+ui <- tagList(
+  fluidPage(
+    titlePanel("Explore Water Quality Trends"),
     
-    tabPanel("Trends",
-             sidebarLayout(
-               sidebarPanel(
-                 selectInput("site", "Monitoring Site:", choices = unique(df$Site)),
+    tabsetPanel(
+      tabPanel("Overview",
+               br(),
+               h3("Devereux Slough Water Quality Monitoring"),
+               p("This Shiny application helps visualize trends in water quality at multiple monitoring sites in Devereux Slough."),
+               p("Use the Trends tab to explore time series and seasonal patterns for parameters such as temperature, salinity, dissolved oxygen, and turbidity.")
+      ),
+      
+      tabPanel("Trends",
+               sidebarLayout(
+                 sidebarPanel(
+                   selectInput("site", "Monitoring Site:", choices = unique(df$Site)),
+                   
+                   uiOutput("depthSelector"),
+                   
+                   selectInput("parameter", "Parameter:",
+                               choices = c("Temperature", "Salinity", "DO", "Turbidity")),
+                   
+                   sliderInput("yearRange", "Year Range:",
+                               min = min(df$Year, na.rm = TRUE),
+                               max = max(df$Year, na.rm = TRUE),
+                               value = c(min(df$Year, na.rm = TRUE), max(df$Year, na.rm = TRUE)),
+                               sep = ""),
+                   
+                   sliderInput("monthRange", "Months:",
+                               min = 1, max = 12, value = c(1, 12), step = 1)
+                 ),
                  
-                 uiOutput("depthSelector"),
-                 
-                 selectInput("parameter", "Parameter:",
-                             choices = c("Temperature", "Salinity", "DO", "Turbidity")),
-                 
-                 sliderInput("yearRange", "Year Range:",
-                             min = min(df$Year, na.rm = TRUE),
-                             max = max(df$Year, na.rm = TRUE),
-                             value = c(min(df$Year, na.rm = TRUE), max(df$Year, na.rm = TRUE)),
-                             sep = ""),
-                 
-                 sliderInput("monthRange", "Months:",
-                             min = 1, max = 12, value = c(1, 12), step = 1)
-               ),
-               
-               mainPanel(
-                 tabsetPanel(
-                   tabPanel("Time Series", plotOutput("timePlot")),
-                   tabPanel("Seasonal Patterns", plotOutput("seasonPlot"))
+                 mainPanel(
+                   tabsetPanel(
+                     tabPanel("Time Series", plotOutput("timePlot")),
+                     tabPanel("Seasonal Patterns", plotOutput("seasonPlot"))
+                   )
                  )
                )
-             )
+      )
     )
+  ),
+  
+  # --- Footer with logos ---
+  div(
+    style = "text-align: center; padding: 20px; border-top: 1px solid #ccc; margin-top: 30px;",
+    img(src = "nrs_logo.png", height = "60px", style = "margin: 10px;"),
+    img(src = "COPR_logo.png", height = "60px", style = "margin: 10px;")
   )
 )
 
