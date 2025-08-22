@@ -38,6 +38,8 @@ ui <- tagList(
   fluidPage(
     titlePanel("Explore Water Quality Trends"),
     
+    # TODO: Add new tabs here for map
+    
     tabsetPanel(
       tabPanel("Overview",
                br(),
