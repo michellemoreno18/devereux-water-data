@@ -1,5 +1,4 @@
 # app HI its sam
-# hii
 # needed libraries
 library(shiny)
 
