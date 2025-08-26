@@ -3,6 +3,7 @@ library(shiny)
 library(tidyverse)
 library(lubridate)
 library(shinydashboard)
+library(leaflet)
 
 # Load and clean data
 df <- read_csv("data/water_quality_data.csv", show_col_types = FALSE) %>%
@@ -33,12 +34,17 @@ df <- read_csv("data/water_quality_data.csv", show_col_types = FALSE) %>%
   filter(Site %in% c("MO1", "CUL1", "VBR1", "PIER")) %>%
   drop_na(Date, Site)
 
+# Site coordinates
+site_locations <- tibble::tibble(
+  Site = c("MO1", "CUL1", "VBR1", "PIER"),
+  Latitude = c(34.410235, 34.413928, 34.417485, 34.411906),
+  Longitude = c(-119.878968, -119.873961, -119.874138, -119.877158)
+)
+
 # UI
 ui <- tagList(
   fluidPage(
     titlePanel("Explore Water Quality Trends"),
-    
-    # TODO: Add new tabs here for map
     
     tabsetPanel(
       tabPanel("Overview",
@@ -75,6 +81,14 @@ ui <- tagList(
                    )
                  )
                )
+      ),
+      
+      # --- Map Tab ---
+      tabPanel("Map",
+               br(),
+               h3("Monitoring Site Locations"),
+               checkboxInput("showLegend", "Show Legend", value = TRUE),
+               leafletOutput("map", height = "600px")
       )
     )
   ),
@@ -134,6 +148,55 @@ server <- function(input, output, session) {
       labs(title = paste("Seasonal Patterns of", input$parameter, "at", input$site),
            x = "Month", y = input$parameter) +
       theme_minimal(base_size = 14)
+  })
+  
+  # Leaflet map using awesomeIcons per site
+  output$map <- renderLeaflet({
+    # Define individual awesomeIcons for each site
+    icon_list <- list(
+      "MO1" = awesomeIcons(icon = "tint", iconColor = "white", library = "fa", markerColor = "orange"),
+      "CUL1" = awesomeIcons(icon = "tint", iconColor = "white", library = "fa", markerColor = "blue"),
+      "VBR1" = awesomeIcons(icon = "tint", iconColor = "white", library = "fa", markerColor = "green"),
+      "PIER" = awesomeIcons(icon = "tint", iconColor = "white", library = "fa", markerColor = "red")
+    )
+    
+    # Start base map
+    map <- leaflet() %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE)) %>%
+      addMiniMap(toggleDisplay = TRUE, position = "bottomright")
+    
+    # Add markers per site with corresponding icon
+    for (site in names(icon_list)) {
+      site_data <- filter(site_locations, Site == site)
+      map <- map %>%
+        addAwesomeMarkers(
+          data = site_data,
+          lng = ~Longitude,
+          lat = ~Latitude,
+          icon = icon_list[[site]],
+          label = ~Site,
+          popup = ~paste0(
+            "<strong>Site:</strong> ", Site, "<br>",
+            "<strong>Lat:</strong> ", round(Latitude, 6), "<br>",
+            "<strong>Lon:</strong> ", round(Longitude, 6)
+          )
+        )
+    }
+    
+    # Add legend conditionally
+    if (input$showLegend) {
+      map <- map %>%
+        addLegend(
+          position = "bottomright",
+          colors = c("orange", "blue", "green", "red"),
+          labels = c("MO1", "CUL1", "VBR1", "PIER"),
+          title = "Monitoring Sites",
+          opacity = 1
+        )
+    }
+    
+    map
   })
 }
 
