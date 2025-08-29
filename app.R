@@ -334,8 +334,12 @@ ui <- tagList(
     
     tags$a(href = "https://www.ucsb.edu/", target = "_blank",
            tags$img(src = "ucsb_logo.png", height = "60px"))
-  )
-  
+  ),
+  div(
+  "Current maintainers: Samuel A. Cervantes and Michelle Moreno",
+  style = "text-align: center; font-size: 0.8em; color: #003660; margin-top: 5px;"
+)
+
 )
 
 # Server
