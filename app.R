@@ -204,6 +204,10 @@ ui <- tagList(
                      tabPanel("Seasonal Patterns", plotOutput("seasonPlot"))
                    )
                  )
+               ),
+               # --- UCSB Footer ---
+               div(class = "ucsb-footer",
+                   "Coal Oil Point Reserve • UCSB • Devereux Slough Monitoring"
                )
       ),
       
@@ -212,7 +216,13 @@ ui <- tagList(
                br(),
                h3("Monitoring Site Locations"),
                checkboxInput("showLegend", "Show Legend", value = TRUE),
-               leafletOutput("map", height = "600px")
+               leafletOutput("map", height = "600px"),
+               
+               # --- UCSB Footer ---
+               div(class = "ucsb-footer",
+                   "Coal Oil Point Reserve • UCSB • Devereux Slough Monitoring"
+               )
+
       ),
       
       # --- Methods & FAQ ---
