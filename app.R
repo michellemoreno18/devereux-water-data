@@ -174,7 +174,7 @@ ui <- tagList(
   fluidPage(
     theme = ucsb_theme,
     tags$head(tags$style(ucsb_css)),
-    titlePanel("Explore Water Quality Trends"),
+    h1("Explore Water Quality Trends", style = "margin-top: 30px; color: #003660; font-family: 'Nunito Sans'; font-weight: 700;"),
     
     tabsetPanel(
       # --- Overview (COPR / Devereux Slough) ---
@@ -211,11 +211,15 @@ ui <- tagList(
                  )
                ),
                br(),
-               h4("How to use this app"),
-               tags$ol(
-                 tags$li(strong("Trends → Time Series:"), " select a parameter to view changes through time at a site and depth."),
-                 tags$li(strong("Trends → Seasonal Patterns:"), " compare monthly distributions across years."),
-                 tags$li(strong("Map:"), " locate monitoring sites and toggle basemaps.")
+               div(
+                 class = "info-card blue",  # match your existing info-card style
+                 style = "margin: 0 auto; max-width: 900px; text-align: left;", # center and width
+                 h4("How to use this app", style = "text-align: center; margin-bottom: 15px;"),
+                 tags$ol(
+                   tags$li(strong("Trends → Time Series:"), " select a parameter to view changes through time at a site and depth."),
+                   tags$li(strong("Trends → Seasonal Patterns:"), " compare monthly distributions across years."),
+                   tags$li(strong("Map:"), " locate monitoring sites and toggle basemaps.")
+                 )
                ),
                br(),
                h4("Data Notes"),
@@ -309,7 +313,7 @@ ui <- tagList(
   
   div(
     style = "
-    background-color: #FEBC11;      
+    background-color: #FEBC11;
     text-align: center;              
     padding: 15px 0;                
     border-top: 2px solid #003660;   
