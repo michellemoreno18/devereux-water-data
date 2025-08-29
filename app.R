@@ -71,7 +71,23 @@ ucsb_css <- HTML("
   h1, h2, h3 { font-weight: 700; color: #003660; }
   h1, h2 { border-bottom: 3px solid #FEBC11; padding-bottom: 5px; margin-bottom: 15px; }
   .nav-tabs > li > a { font-weight: 600; }
-  .nav-tabs > li.active > a { background-color: #003660 !important; color: #fff !important; }
+  .nav-tabs > li > a { 
+  font-weight: 600; 
+  color: #003660; 
+  transition: background-color 0.3s ease;
+  border-radius: 6px 6px 0 0;
+  padding: 10px 15px;
+}
+
+.nav-tabs > li > a:hover {
+  background-color: #FEBC11 !important; /* UCSB Gold */
+  color: #003660 !important;
+}
+.nav-tabs > li.active > a {
+  background-color: #003660 !important; /* UCSB Navy */
+  color: #fff !important;
+}
+
 
   /* Sidebar styling */
   .ucsb-sidebar {
@@ -118,6 +134,39 @@ ucsb_css <- HTML("
   }
   .info-card.gold { background: #FFF6D6; border-left: 6px solid #FEBC11; }
   .info-card.blue { background: #F0F6FB; border-left: 6px solid #003660; }
+  
+  .leaflet-control, 
+  .leaflet-control-layers, 
+  .leaflet-control-zoom, 
+  .leaflet-control-scale,
+  .leaflet-control-layers-toggle,
+  .leaflet-control-attribution {
+    font-family: 'Nunito Sans', sans-serif;
+    font-weight: 600;
+    color: #003660; /* UCSB navy */
+  }
+
+  .leaflet-popup-content, 
+  .leaflet-popup-content-wrapper, 
+  .leaflet-popup-tip {
+    font-family: 'Nunito Sans', sans-serif;
+    font-weight: 600;
+    color: #003660; /* UCSB navy */
+  }
+  
+ .info-card.gold { background: #FFF6D6; border-left: 6px solid #FEBC11; }
+ .info-card.blue { background: #F0F6FB; border-left: 6px solid #003660; }
+
+/* Leaflet legend font */
+ .leaflet-control.leaflet-legend {
+  font-family: 'Nunito Sans', sans-serif !important;
+  font-weight: 600 !important;
+  color: #003660 !important;
+}
+ .leaflet-control.leaflet-legend b {
+  font-weight: 700 !important;
+  color: #FEBC11 !important;
+ }
 ")
 
 # UI
@@ -204,24 +253,17 @@ ui <- tagList(
                      tabPanel("Seasonal Patterns", plotOutput("seasonPlot"))
                    )
                  )
-               ),
-               # --- UCSB Footer ---
-               div(class = "ucsb-footer",
-                   "Coal Oil Point Reserve • UCSB • Devereux Slough Monitoring"
                )
       ),
       
       # --- Map Tab ---
       tabPanel("Map",
                br(),
-               h3("Monitoring Site Locations"),
+               h3("Monitoring Site Locations",
+                  style = "color:#003660; font-family:'Nunito Sans'; font-weight:700; margin-bottom: 20px;"),
                checkboxInput("showLegend", "Show Legend", value = TRUE),
                leafletOutput("map", height = "600px"),
                
-               # --- UCSB Footer ---
-               div(class = "ucsb-footer",
-                   "Coal Oil Point Reserve • UCSB • Devereux Slough Monitoring"
-               )
 
       ),
       
@@ -265,13 +307,31 @@ ui <- tagList(
     )
   ),
   
-  # --- Footer with logos ---
   div(
-    style = "text-align: center; padding: 20px; border-top: 1px solid #ccc; margin-top: 30px;",
-    img(src = "nrs_logo.png", height = "60px", style = "margin: 10px;"),
-    img(src = "COPR_logo.png", height = "60px", style = "margin: 10px;"),
-    img(src = "ucsb_logo.png", height = "60px", style = "margin: 10px;")
+    style = "
+    background-color: #FEBC11;      
+    text-align: center;              
+    padding: 15px 0;                
+    border-top: 2px solid #003660;   
+    display: flex;                   
+    justify-content: center;         
+    align-items: center;             
+    gap: 20px;                       
+    flex-wrap: wrap;
+    margin-top: 40px;
+  ",
+    
+    # Clickable logos
+    tags$a(href = "https://www.nrs.ucsb.edu/", target = "_blank",
+           tags$img(src = "nrs_logo.png", height = "60px")),
+    
+    tags$a(href = "https://copr.nrs.ucsb.edu/", target = "_blank",
+           tags$img(src = "COPR_logo.png", height = "60px")),
+    
+    tags$a(href = "https://www.ucsb.edu/", target = "_blank",
+           tags$img(src = "ucsb_logo.png", height = "60px"))
   )
+  
 )
 
 # Server
@@ -325,16 +385,16 @@ server <- function(input, output, session) {
       geom_point(alpha = 0.6, size = 1.2, color = "#003660") +
       labs(title = paste(param_label(), "at", input$site),
            x = "Date", y = param_label()) +
-      theme_minimal(base_size = 14)
+      theme_minimal(base_family = "")
   })
   
   # Seasonal plot (UCSB Gold)
   output$seasonPlot <- renderPlot({
     ggplot(filteredData(), aes(x = month(Date, label = TRUE), y = .data[[input$parameter]])) +
-      geom_boxplot(fill = "#FEBC11") +
+      geom_boxplot(fill = "#A9D1FF") +
       labs(title = paste("Seasonal Patterns of", param_label(), "at", input$site),
            x = "Month", y = param_label()) +
-      theme_minimal(base_size = 14)
+      theme_minimal(base_family = "")
   })
   
   # Leaflet map with basemap toggle
