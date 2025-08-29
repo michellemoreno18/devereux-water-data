@@ -212,13 +212,13 @@ ui <- tagList(
                ),
                br(),
                div(
-                 class = "info-card blue",  # match your existing info-card style
-                 style = "margin: 0 auto; max-width: 900px; text-align: left;", # center and width
-                 h4("How to use this app", style = "text-align: center; margin-bottom: 15px;"),
+                 class = "info-card blue",  
+                 style = "margin: 0 auto; max-width: 900px; text-align: left; padding: 20px;",
+                 h4("How to use this app", style = "text-align: center; margin-bottom: 20px;"),
                  tags$ol(
-                   tags$li(strong("Trends → Time Series:"), " select a parameter to view changes through time at a site and depth."),
-                   tags$li(strong("Trends → Seasonal Patterns:"), " compare monthly distributions across years."),
-                   tags$li(strong("Map:"), " locate monitoring sites and toggle basemaps.")
+                   tags$li(style = "margin-bottom: 10px;", strong("Trends → Time Series:"), " select a parameter to view changes through time at a site and depth."),
+                   tags$li(style = "margin-bottom: 10px;", strong("Trends → Seasonal Patterns:"), " compare monthly distributions across years."),
+                   tags$li(style = "margin-bottom: 10px;", strong("Map:"), " locate monitoring sites and toggle basemaps.")
                  )
                ),
                br(),
