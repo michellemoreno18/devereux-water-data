@@ -249,7 +249,7 @@ ui <- tagList(
                ),
                tags$details(
                  tags$summary("Contact & attribution"),
-                 p("Developed for the Coal Oil Point Reserve (UCSB). For questions or to report issues, please contact the COPR team.")
+                 p("Developed for the Coal Oil Point Reserve (UCSB). For questions or to report issues, please contact the COPR team via email: https://copr.nrs.ucsb.edu/contact/.")
                )
       )
     )
