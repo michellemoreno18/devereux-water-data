@@ -259,7 +259,8 @@ ui <- tagList(
   div(
     style = "text-align: center; padding: 20px; border-top: 1px solid #ccc; margin-top: 30px;",
     img(src = "nrs_logo.png", height = "60px", style = "margin: 10px;"),
-    img(src = "COPR_logo.png", height = "60px", style = "margin: 10px;")
+    img(src = "COPR_logo.png", height = "60px", style = "margin: 10px;"),
+    img(src = "ucsb_logo.png", height = "60px", style = "margin: 10px;")
   )
 )
 
