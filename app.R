@@ -450,10 +450,9 @@ server <- function(input, output, session) {
           label = ~Site,
           popup = ~paste0(
             "<strong>Site:</strong> ", Site, "<br>",
-            "<strong>Lat:</strong> ", round(Latitude, 6), "<br>",
-            "<strong>Lon:</strong> ", round(Longitude, 6), "<br>",  
+            "<strong>Coordinates:</strong> ",
             "<a href='https://www.google.com/maps?q=", Latitude, ",", Longitude,
-            "' target='_blank'>Open in Google Maps</a>"               
+            "' target='_blank'>", round(Latitude, 6), ", ", round(Longitude, 6), "</a>"
           )
         )
     }
