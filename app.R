@@ -228,7 +228,8 @@ ui <- tagList(
                           format(min(df$Date, na.rm = TRUE), "%B %Y"), " to ",
                           format(max(df$Date, na.rm = TRUE), "%B %Y"),
                           " (", nrow(df), " observations across ",
-                          length(unique(df$Site)), " sites).")
+                          length(unique(df$Site)), " sites). ",
+                          "Last updated: ", format(max(df$Date, na.rm = TRUE), "%B %d, %Y"), ".")
                )
       ),
       
@@ -268,7 +269,7 @@ ui <- tagList(
                checkboxInput("showLegend", "Show Legend", value = TRUE),
                leafletOutput("map", height = "600px"),
                
-
+               
       ),
       
       # --- Methods & FAQ ---
@@ -336,10 +337,10 @@ ui <- tagList(
            tags$img(src = "ucsb_logo.png", height = "60px"))
   ),
   div(
-  "Current maintainers: Samuel A. Cervantes and Michelle Moreno",
-  style = "text-align: center; font-size: 0.8em; color: #003660; margin-top: 5px;"
-)
-
+    "Developed by Samuel A. Cervantes and Michelle Moreno",
+    style = "text-align: center; font-size: 0.8em; color: #003660; margin-top: 5px;"
+  )
+  
 )
 
 # Server
