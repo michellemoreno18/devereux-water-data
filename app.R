@@ -223,14 +223,21 @@ ui <- tagList(
                ),
                br(),
                h4("Data Notes"),
-               div(class = "data-notes",
-                   paste0("Dataset covers ",
-                          format(min(df$Date, na.rm = TRUE), "%B %Y"), " to ",
-                          format(max(df$Date, na.rm = TRUE), "%B %Y"),
-                          " (", nrow(df), " observations across ",
-                          length(unique(df$Site)), " sites). ",
-                          "Last updated: ", format(max(df$Date, na.rm = TRUE), "%B %d, %Y"), ".")
+               div(
+                 class = "data-notes",
+                 paste0(
+                   "Dataset covers ",
+                   format(min(df$Date, na.rm = TRUE), "%B %Y"), " to ",
+                   format(max(df$Date, na.rm = TRUE), "%B %Y"),
+                   " (", nrow(df), " observations across ",
+                   length(unique(df$Site)), " sites). "
+                 ),
+                 tags$i(
+                   paste0("Last updated: ",
+                          format(max(df$Date, na.rm = TRUE), "%B %d, %Y"))
+                 )
                )
+               
       ),
       
       tabPanel("Trends",
