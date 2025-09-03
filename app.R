@@ -451,7 +451,9 @@ server <- function(input, output, session) {
           popup = ~paste0(
             "<strong>Site:</strong> ", Site, "<br>",
             "<strong>Lat:</strong> ", round(Latitude, 6), "<br>",
-            "<strong>Lon:</strong> ", round(Longitude, 6)
+            "<strong>Lon:</strong> ", round(Longitude, 6), "<br>",  
+            "<a href='https://www.google.com/maps?q=", Latitude, ",", Longitude,
+            "' target='_blank'>Open in Google Maps</a>"               
           )
         )
     }
