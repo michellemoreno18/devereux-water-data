@@ -5,6 +5,7 @@ library(lubridate)
 library(shinydashboard)
 library(leaflet)
 library(bslib)
+library(plotly)
 
 # Load and clean data
 df <- read_csv("data/water_quality_data.csv", show_col_types = FALSE) %>%
@@ -261,8 +262,8 @@ ui <- tagList(
                  ),
                  mainPanel(
                    tabsetPanel(
-                     tabPanel("Time Series", plotOutput("timePlot")),
-                     tabPanel("Seasonal Patterns", plotOutput("seasonPlot"))
+                     tabPanel("Time Series", plotlyOutput("timePlot")),
+                     tabPanel("Seasonal Patterns", plotlyOutput("seasonPlot"))
                    )
                  )
                )
@@ -403,22 +404,60 @@ server <- function(input, output, session) {
   )
   
   # Time series plot (UCSB Navy)
-  output$timePlot <- renderPlot({
-    ggplot(filteredData(), aes(x = Date, y = .data[[input$parameter]])) +
-      geom_line(color = "#003660") +
-      geom_point(alpha = 0.6, size = 1.2, color = "#003660") +
-      labs(title = paste(param_label(), "at", input$site),
-           x = "Date", y = param_label()) +
-      theme_minimal(base_family = "")
+  
+  output$timePlot <- renderPlotly({
+    p <- ggplot(filteredData(), aes(x = Date, y = .data[[input$parameter]])) +
+      geom_line(color = "#003660", size = 0.8) +
+      geom_point(aes(text = paste("Date:", Date,
+                                  "<br>", param_label(), ":", round(.data[[input$parameter]], 2))),
+                 alpha = 0.7, size = 1.5, color = "#FEBC11") +
+      labs(
+        title = paste(param_label(), "at", input$site),
+        x = "Date",
+        y = param_label()
+      ) +
+      scale_y_continuous(labels = scales::label_number()) +
+      theme_minimal(base_family = "Nunito Sans") +
+      theme(
+        plot.title = element_text(size = 18, face = "bold", color = "#003660"),
+        axis.title = element_text(size = 14, face = "bold", color = "#003660"),
+        axis.text = element_text(size = 12, color = "#003660"),
+        axis.line = element_line(color = "#003660", size = 0.8),
+        axis.ticks = element_line(color = "#003660"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(size = 0.3, color = "gray80")
+      )
+    
+    ggplotly(p, tooltip = "text") %>%
+      layout(hoverlabel = list(font = list(family = "Nunito Sans")))
   })
   
   # Seasonal plot (UCSB Gold)
-  output$seasonPlot <- renderPlot({
-    ggplot(filteredData(), aes(x = month(Date, label = TRUE), y = .data[[input$parameter]])) +
-      geom_boxplot(fill = "#A9D1FF") +
-      labs(title = paste("Seasonal Patterns of", param_label(), "at", input$site),
-           x = "Month", y = param_label()) +
-      theme_minimal(base_family = "")
+  
+  output$seasonPlot <- renderPlotly({
+    p <- ggplot(filteredData(), aes(x = month(Date, label = TRUE), y = .data[[input$parameter]])) +
+      geom_boxplot(aes(text = paste("Month:", month(Date, label = TRUE),
+                                    "<br>", param_label(), ":", round(.data[[input$parameter]], 2))),
+                   fill = "#FEBC11", color = "#003660", outlier.color = "#003660") +
+      labs(
+        title = paste("Seasonal Patterns of", param_label(), "at", input$site),
+        x = "Month",
+        y = param_label()
+      ) +
+      scale_y_continuous(labels = scales::label_number()) +
+      theme_minimal(base_family = "Nunito Sans") +
+      theme(
+        plot.title = element_text(size = 18, face = "bold", color = "#003660"),
+        axis.title = element_text(size = 14, face = "bold", color = "#003660"),
+        axis.text = element_text(size = 12, color = "#003660"),
+        axis.line = element_line(color = "#003660", size = 0.8),
+        axis.ticks = element_line(color = "#003660"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(size = 0.3, color = "gray80")
+      )
+    
+    ggplotly(p, tooltip = "text") %>%
+      layout(hoverlabel = list(font = list(family = "Nunito Sans")))
   })
   
   # Leaflet map with basemap toggle
