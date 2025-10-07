@@ -6,6 +6,7 @@ library(shinydashboard)
 library(leaflet)
 library(bslib)
 library(plotly)
+library(shinyWidgets) 
 
 # Load and clean data
 df <- readr::read_csv("data/water_quality_data.csv", show_col_types = FALSE)
@@ -70,114 +71,186 @@ ucsb_theme <- bs_theme(
 
 # UCSB CSS (+ colorful overview cards)
 ucsb_css <- HTML("
-  body { font-family: 'Nunito Sans', sans-serif; color: #003660; }
-  h1, h2, h3 { font-weight: 700; color: #003660; }
-  h1, h2 { border-bottom: 3px solid #FEBC11; padding-bottom: 5px; margin-bottom: 15px; }
-  .nav-tabs > li > a { font-weight: 600; }
-  .nav-tabs > li > a { 
-  font-weight: 600; 
-  color: #003660; 
-  transition: background-color 0.3s ease;
-  border-radius: 6px 6px 0 0;
-  padding: 10px 15px;
-}
+  /* --- General font and color --- */
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    color: #003660;
+    background-color: #ffffff;
+  }
 
-.nav-tabs > li > a:hover {
-  background-color: #FEBC11 !important; /* UCSB Gold */
-  color: #003660 !important;
-}
-.nav-tabs > li.active > a {
-  background-color: #003660 !important; /* UCSB Navy */
-  color: #fff !important;
-}
+  h1, h2, h3 {
+    font-weight: 700;
+    color: #003660;
+  }
 
+  h1, h2 {
+    border-bottom: 2px solid #FEBC11;
+    padding-bottom: 4px;
+    margin-bottom: 15px;
+  }
 
-  /* Sidebar styling */
+  /* --- Clean Top Banner --- */
+  .top-banner {
+    background-color: #003660;
+    color: white;
+    padding: 18px 30px;
+    text-align: center;
+    border-bottom: 3px solid #FEBC11;
+  }
+
+  .top-banner h1 {
+    margin: 0;
+    font-size: 2.2em;
+    font-weight: 800;
+    color: white;
+  }
+
+  /* --- Tabs --- */
+  .nav-tabs {
+    background-color: #F9F9F9;
+    border: none;
+    border-bottom: 2px solid #FEBC11;
+  }
+
+  .nav-tabs > li > a {
+    color: #003660 !important;
+    background-color: transparent !important;
+    font-weight: 600;
+    border: none !important;
+    padding: 10px 16px;
+  }
+
+  .nav-tabs > li.active > a {
+    background-color: #003660 !important;
+    color: #ffffff !important;
+    border-radius: 6px 6px 0 0;
+  }
+
+  .nav-tabs > li > a:hover {
+    background-color: #FEBC11 !important;
+    color: #003660 !important;
+  }
+
+  /* --- Sidebar --- */
   .ucsb-sidebar {
-    background: #F5F9FC; border: 1px solid #DCE7F3; border-left: 6px solid #FEBC11;
-    border-radius: 8px; padding: 12px 16px; margin-bottom: 10px;
+    background: #F9FBFD;
+    border-left: 4px solid #FEBC11;
+    border-radius: 4px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
   }
+
   .ucsb-sidebar .ucsb-sidebar-header {
-    font-weight: 800; color: #003660; text-transform: uppercase;
-    letter-spacing: 0.5px; margin-bottom: 10px;
-  }
-  .ucsb-sidebar .control-label, .ucsb-sidebar label { color: #003660; font-weight: 600; }
-  .ucsb-sidebar .form-control, .ucsb-sidebar .form-select { border-color: rgba(0,54,96,0.25); }
-  .ucsb-sidebar .btn-primary { background-color: #003660; border-color: #003660; }
-  .ucsb-sidebar .irs-bar, .ucsb-sidebar .irs-single, .ucsb-sidebar .irs-handle > i:first-child {
-    background: #003660; border-color: #003660;
-  }
-  .ucsb-sidebar .irs-line { background: #DCE7F3; }
-
-  /* Badges */
-  .badge {
-    display: inline-block; padding: 6px 10px; margin: 4px 6px 0 0; font-weight: 700;
-    border-radius: 999px; background: #003660; color: #fff;
-  }
-  .badge.badge-gold { background: #FEBC11; color: #003660; }
-
-  /* Data notes */
-  .data-notes {
-    background: #F5F9FC; border-left: 5px solid #FEBC11; padding: 10px 15px;
-    margin-top: 20px; border-radius: 6px; font-size: 0.95em;
+    font-weight: 800;
+    color: #003660;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-size: 0.9em;
   }
 
-  /* Overview: hero banner + info cards */
+  .ucsb-sidebar label {
+    color: #003660;
+    font-weight: 600;
+  }
+
+  .ucsb-sidebar .btn-primary {
+    background-color: #003660;
+    border-color: #003660;
+  }
+
+  .ucsb-sidebar .irs-bar,
+  .ucsb-sidebar .irs-single,
+  .ucsb-sidebar .irs-handle > i:first-child {
+    background: #003660;
+    border-color: #003660;
+  }
+
+  .ucsb-sidebar .irs-line {
+    background: #DCE7F3;
+  }
+
+  /* --- Hero Section --- */
   .hero {
     background: #003660;
     color: #ffffff;
-    padding: 16px 18px;
+    padding: 20px;
     border-radius: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
-  .hero h3 { color: #ffffff; border: none; margin: 0 0 6px 0; }
+
+  .hero h3 {
+    color: white;
+    margin: 0 0 6px 0;
+    font-size: 1.4em;
+  }
+
+  /* --- Info Cards --- */
   .info-card {
-    border-radius: 8px; padding: 12px 14px; margin-bottom: 10px;
-    border: 1px solid #DCE7F3;
-  }
-  .info-card.gold { background: #FFF6D6; border-left: 6px solid #FEBC11; }
-  .info-card.blue { background: #F0F6FB; border-left: 6px solid #003660; }
-  
-  .leaflet-control, 
-  .leaflet-control-layers, 
-  .leaflet-control-zoom, 
-  .leaflet-control-scale,
-  .leaflet-control-layers-toggle,
-  .leaflet-control-attribution {
-    font-family: 'Nunito Sans', sans-serif;
-    font-weight: 600;
-    color: #003660; /* UCSB navy */
+    border-radius: 6px;
+    padding: 14px;
+    margin-bottom: 10px;
+    border-left: 5px solid #DCE7F3;
+    background: #F5F9FC;
   }
 
-  .leaflet-popup-content, 
-  .leaflet-popup-content-wrapper, 
-  .leaflet-popup-tip {
+  .info-card.gold {
+    border-left: 5px solid #FEBC11;
+    background: #FFF9E3;
+  }
+
+  .info-card.blue {
+    border-left: 5px solid #003660;
+    background: #EDF4FA;
+  }
+
+  /* --- Badges --- */
+  .badge {
+    display: inline-block;
+    padding: 6px 10px;
+    margin: 4px 6px 0 0;
+    font-weight: 700;
+    border-radius: 999px;
+    background: #003660;
+    color: #fff;
+  }
+
+  .badge.badge-gold {
+    background: #FEBC11;
+    color: #003660;
+  }
+
+  /* --- Data notes --- */
+  .data-notes {
+    background: #F5F9FC;
+    border-left: 4px solid #FEBC11;
+    padding: 10px 15px;
+    margin-top: 20px;
+    border-radius: 6px;
+    font-size: 0.95em;
+  }
+
+  /* --- Leaflet styles --- */
+  .leaflet-control,
+  .leaflet-popup-content {
     font-family: 'Nunito Sans', sans-serif;
     font-weight: 600;
-    color: #003660; /* UCSB navy */
+    color: #003660;
   }
-  
- .info-card.gold { background: #FFF6D6; border-left: 6px solid #FEBC11; }
- .info-card.blue { background: #F0F6FB; border-left: 6px solid #003660; }
 
-/* Leaflet legend font */
- .leaflet-control.leaflet-legend {
-  font-family: 'Nunito Sans', sans-serif !important;
-  font-weight: 600 !important;
-  color: #003660 !important;
-}
- .leaflet-control.leaflet-legend b {
-  font-weight: 700 !important;
-  color: #FEBC11 !important;
- }
+  .leaflet-control.leaflet-legend b {
+    color: #FEBC11 !important;
+  }
 ")
+
 
 # UI
 ui <- tagList(
   fluidPage(
     theme = ucsb_theme,
     tags$head(tags$style(ucsb_css)),
-    h1("Explore Water Quality Trends", style = "margin-top: 30px; color: #003660; font-family: 'Nunito Sans'; font-weight: 700;"),
+    div(class = "top-banner",
+        h1("Devereux Slough Water Quality Explorer")
+    ),
     
     tabsetPanel(
       # --- Overview (COPR / Devereux Slough) ---
@@ -251,13 +324,21 @@ ui <- tagList(
                        selectInput("site", "Monitoring Site:", choices = unique(df$Site)),
                        uiOutput("depthSelector"),
                        selectInput("parameter", "Parameter:", choices = param_choices),
-                       sliderInput("yearRange", "Year Range:",
-                                   min = min(df$Year, na.rm = TRUE),
-                                   max = max(df$Year, na.rm = TRUE),
-                                   value = c(min(df$Year, na.rm = TRUE), max(df$Year, na.rm = TRUE)),
-                                   sep = ""
+                       sliderTextInput(
+                         inputId = "yearRange",
+                         label = "Year Range:",
+                         choices = sort(unique(df$Year)),
+                         selected = range(df$Year),
+                         grid = TRUE
                        ),
-                       sliderInput("monthRange", "Months:", min = 1, max = 12, value = c(1, 12), step = 1),
+                       
+                       sliderTextInput(
+                         inputId = "monthRange",
+                         label = "Months:",
+                         choices = month.name,
+                         selected = month.name[c(1, 12)],
+                         grid = TRUE
+                       ),
                        br(),
                        downloadButton("download_csv", "Download filtered data (CSV)", class = "btn-primary")
                    )
@@ -384,10 +465,10 @@ server <- function(input, output, session) {
     df %>%
       filter(
         Site == input$site,
-        Year >= input$yearRange[1],
-        Year <= input$yearRange[2],
-        Month >= input$monthRange[1],
-        Month <= input$monthRange[2],
+        Year >= as.numeric(input$yearRange[1]),
+        Year <= as.numeric(input$yearRange[2]),
+        Month >= match(input$monthRange[1], month.name),
+        Month <= match(input$monthRange[2], month.name),
         if (input$site == "PIER") Depth == as.numeric(input$depth) else DepthLayer == input$depth
       )
   })
