@@ -8,11 +8,13 @@ library(bslib)
 library(plotly)
 
 # Load and clean data
-df <- read_csv("data/water_quality_data.csv", show_col_types = FALSE) %>%
+df <- readr::read_csv("data/water_quality_data.csv", show_col_types = FALSE)
+
+df <- df %>%
   rename(
     Date = "Date",
     Site = "Site",
-    Depth = "Depth (cm)",
+    Depth_raw = "Depth (cm)",
     Temperature = "Temperature (C)",
     Salinity = "Salinity (ppt)",
     DO = "Dissolved Oxygen (mg/L)",
@@ -22,7 +24,12 @@ df <- read_csv("data/water_quality_data.csv", show_col_types = FALSE) %>%
   ) %>%
   mutate(
     Date = mdy(Date),
-    Depth = as.numeric(Depth),
+    # Convert numeric depths if applicable
+    Depth = suppressWarnings(as.numeric(Depth_raw)),
+    DepthLayer = case_when(
+      Site == "PIER" ~ as.character(Depth),
+      Site != "PIER" ~ Depth_raw
+    ),
     Temperature = as.numeric(Temperature),
     Salinity = as.numeric(Salinity),
     DO = as.numeric(DO),
@@ -30,12 +37,7 @@ df <- read_csv("data/water_quality_data.csv", show_col_types = FALSE) %>%
     Conductivity = as.numeric(Conductivity),
     DO_percent = as.numeric(DO_percent),
     Month = month(Date),
-    Year = year(Date),
-    DepthLayer = case_when(
-      Site != "PIER" & Depth <= 20 ~ "Surface",
-      Site != "PIER" & Depth > 20 ~ "Bottom",
-      Site == "PIER" ~ as.character(Depth)
-    )
+    Year = year(Date)
   ) %>%
   filter(Site %in% c("MO1", "CUL1", "VBR1", "PIER")) %>%
   drop_na(Date, Site)
@@ -322,7 +324,7 @@ ui <- tagList(
                      target = "_blank"
                    ),
                    "."
-                   )
+                 )
                )
       )
     )
