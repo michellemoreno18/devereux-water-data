@@ -11,6 +11,7 @@ library(shinyWidgets)
 # Load and clean data
 df <- readr::read_csv("data/water_quality_data.csv", show_col_types = FALSE)
 
+# FIRST: Rename columns to short names
 df <- df %>%
   rename(
     Date = "Date",
@@ -19,39 +20,53 @@ df <- df %>%
     Temperature = "Temperature (C)",
     Salinity = "Salinity (ppt)",
     DO = "Dissolved Oxygen (mg/L)",
-    Turbidity = "Turbidity (cm)",
     Conductivity = "Conductivity-specific (mS/cm)",
     DO_percent = "Dissolved Oxygen (%)"
+  )
+
+# THEN: Use renamed columns in mutate
+df <- readr::read_csv("data/water_quality_data.csv", show_col_types = FALSE)
+
+df <- df %>%
+  rename(
+    Depth_raw     = `Depth (cm)`,
+    Temperature   = `Temperature (C)`,
+    Salinity      = `Salinity (ppt)`,
+    DO            = `Dissolved Oxygen (mg/L)`,
+    Conductivity  = `Conductivity-specific (mS/cm)`,
+    DO_percent    = `Dissolved Oxygen (%)`
   ) %>%
   mutate(
-    Date = mdy(Date),
-    # Convert numeric depths if applicable
-    Depth = suppressWarnings(as.numeric(Depth_raw)),
+    Date = lubridate::mdy(Date),
     DepthLayer = case_when(
-      Site == "PIER" ~ as.character(Depth),
-      Site != "PIER" ~ Depth_raw
+      Site == "PIER" ~ Depth_raw,  # Use raw numeric depth for PIER
+      Depth_raw %in% c("Surface", "surface") ~ "Surface",
+      Depth_raw %in% c("Bottom", "bottom") ~ "Bottom",
+      suppressWarnings(as.numeric(Depth_raw)) <= 20 ~ "Surface",
+      suppressWarnings(as.numeric(Depth_raw)) > 20 ~ "Bottom",
+      TRUE ~ NA_character_
     ),
+    Depth = suppressWarnings(as.numeric(Depth_raw)),
     Temperature = as.numeric(Temperature),
     Salinity = as.numeric(Salinity),
     DO = as.numeric(DO),
-    Turbidity = as.numeric(Turbidity),
     Conductivity = as.numeric(Conductivity),
     DO_percent = as.numeric(DO_percent),
-    Month = month(Date),
-    Year = year(Date)
+    Month = lubridate::month(Date),
+    Year = lubridate::year(Date)
   ) %>%
   filter(Site %in% c("MO1", "CUL1", "VBR1", "PIER")) %>%
   drop_na(Date, Site)
 
-# Pretty labels -> internal names
+# Parameter choices for UI
 param_choices <- c(
   "Temperature (C)"               = "Temperature",
   "Salinity (ppt)"                = "Salinity",
   "Dissolved Oxygen (mg/L)"       = "DO",
-  "Turbidity (cm)"                = "Turbidity",
-  "Conductivity-specific (mS/cm)" = "Conductivity",
-  "Dissolved Oxygen (%)"          = "DO_percent"
+  "Dissolved Oxygen (%)"          = "DO_percent",
+  "Conductivity-specific (mS/cm)" = "Conductivity"
 )
+
 
 # Site coordinates
 site_locations <- tibble::tibble(
@@ -266,7 +281,7 @@ ui <- tagList(
                    div(class = "info-card gold",
                        h4("What you can do"),
                        tags$ul(
-                         tags$li("Analyze parameters with units: Temperature (C), Salinity (ppt), Dissolved Oxygen (mg/L, %), Turbidity (cm), Conductivity-specific (mS/cm)."),
+                         tags$li("Analyze parameters with units: Temperature (C), Salinity (ppt), Dissolved Oxygen (mg/L, %), Conductivity-specific (mS/cm)."),
                          tags$li("Filter by site, depth layer (or fixed pier depth), years, and months."),
                          tags$li("Switch the map between Street and Satellite views; inspect popups for coordinates.")
                        )
@@ -382,7 +397,6 @@ ui <- tagList(
                    tags$li("Salinity (ppt) — practical salinity in parts per thousand."),
                    tags$li("Dissolved Oxygen (mg/L) — concentration by mass."),
                    tags$li("Dissolved Oxygen (%) — percent saturation."),
-                   tags$li("Turbidity (cm) — Secchi tube (higher cm = clearer water)."),
                    tags$li("Conductivity-specific (mS/cm) — temperature-corrected conductivity.")
                  )
                ),
@@ -462,15 +476,47 @@ server <- function(input, output, session) {
   
   # Reactive filtered data
   filteredData <- reactive({
-    df %>%
-      filter(
-        Site == input$site,
-        Year >= as.numeric(input$yearRange[1]),
-        Year <= as.numeric(input$yearRange[2]),
-        Month >= match(input$monthRange[1], month.name),
-        Month <= match(input$monthRange[2], month.name),
-        if (input$site == "PIER") Depth == as.numeric(input$depth) else DepthLayer == input$depth
-      )
+    req(input$site, input$parameter, input$yearRange, input$monthRange)
+    
+    # Convert months to numbers
+    selected_months <- match(input$monthRange, month.name)
+    selected_years <- as.numeric(input$yearRange)
+    selected_site <- input$site
+    selected_depth <- if (selected_site == "PIER") {
+      as.numeric(input$depth)
+    } else {
+      input$depth
+    }
+    
+    # Start with full dataset
+    data <- df %>% filter(Site == selected_site)
+    
+    # Filter by year
+    data <- data %>% filter(Year >= selected_years[1], Year <= selected_years[2])
+    
+    # Filter by month
+    data <- data %>% filter(Month >= selected_months[1], Month <= selected_months[2])
+    
+    # Filter by depth
+    if (selected_site == "PIER") {
+      data <- data %>% filter(Depth == selected_depth)
+    } else {
+      data <- data %>% filter(DepthLayer == selected_depth)
+    }
+    
+    # Filter out missing values for the selected parameter
+    data <- data %>% filter(!is.na(.data[[input$parameter]]), !is.na(Date))
+    
+    # Debugging output
+    cat("----\n")
+    cat("Site:", selected_site, "\n")
+    cat("Years:", selected_years[1], "-", selected_years[2], "\n")
+    cat("Months:", selected_months[1], "-", selected_months[2], "\n")
+    cat("Depth:", selected_depth, "\n")
+    cat("Remaining rows after filters:", nrow(data), "\n")
+    cat("Filtered date range:", format(min(data$Date, na.rm = TRUE)), "-", format(max(data$Date, na.rm = TRUE)), "\n")
+    
+    return(data)
   })
   
   # Download filtered CSV
